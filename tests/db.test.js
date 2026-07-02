@@ -11,11 +11,11 @@ function cleanup() {
   }
 }
 
-test('saveEntries and getEntries persist entries in sqlite', () => {
+test('saveEntries and getEntries persist entries in sqlite', async () => {
   cleanup();
 
-  saveEntries([{ id: '1', college: 'IIT Delhi', course: 'Computer Science' }], testDbPath);
-  const entries = getEntries(testDbPath);
+  await saveEntries([{ id: '1', college: 'IIT Delhi', course: 'Computer Science' }], testDbPath);
+  const entries = await getEntries(testDbPath);
 
   assert.equal(entries.length, 1);
   assert.equal(entries[0].college, 'IIT Delhi');

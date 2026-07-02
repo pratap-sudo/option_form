@@ -15,14 +15,15 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
-app.get('/api/entries', (req, res) => {
-  res.json(normalizeEntries(getEntries()));
+app.get('/api/entries', async (req, res) => {
+  const rows = await getEntries();
+  res.json(normalizeEntries(rows));
 });
 
-app.post('/api/entries', (req, res) => {
+app.post('/api/entries', async (req, res) => {
   const incoming = Array.isArray(req.body) ? req.body : [];
   const normalized = normalizeEntries(incoming);
-  saveEntries(normalized);
+  await saveEntries(normalized);
   res.json(normalized);
 });
 
