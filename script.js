@@ -2,6 +2,32 @@ const STORAGE_KEY = 'option-form-entries';
 
 let entries = [];
 
+export function serializeEntries(items) {
+  return JSON.stringify(items);
+}
+
+export function parseEntries(value) {
+  if (!value) return [];
+
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.warn('Unable to parse saved entries:', error);
+    return [];
+  }
+}
+
+export function writeEntriesToStorage(storage, items) {
+  if (!storage) return;
+  storage.setItem(STORAGE_KEY, serializeEntries(items));
+}
+
+export function readEntriesFromStorage(storage) {
+  if (!storage) return [];
+  return parseEntries(storage.getItem(STORAGE_KEY));
+}
+
 function createId() {
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
@@ -50,20 +76,48 @@ export function createTextFileContent(items) {
   return items.map((item, index) => `${index + 1}. ${item.college} - ${item.course}`).join('\n');
 }
 
+function getStorageBackend(storageName) {
+  try {
+    const storage = globalThis[storageName];
+    if (!storage) return null;
+    const testKey = '__storage_test__';
+    storage.setItem(testKey, '1');
+    storage.removeItem(testKey);
+    return storage;
+  } catch (error) {
+    return null;
+  }
+}
+
+function readCookieValue() {
+  if (typeof document === 'undefined') return '';
+  const match = document.cookie.match(new RegExp(`(?:^|; )${STORAGE_KEY}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : '';
+}
+
+function writeCookieValue(value) {
+  if (typeof document === 'undefined') return;
+  document.cookie = `${STORAGE_KEY}=${encodeURIComponent(value)}; path=/; max-age=31536000; SameSite=Lax`;
+}
+
 function saveEntries() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  const payload = serializeEntries(entries);
+  writeEntriesToStorage(getStorageBackend('localStorage'), entries);
+  writeEntriesToStorage(getStorageBackend('sessionStorage'), entries);
+  writeCookieValue(payload);
 }
 
 function loadEntries() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) return [];
-    const parsed = JSON.parse(saved);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (error) {
-    console.warn('Unable to load saved entries:', error);
-    return [];
+  const storages = [getStorageBackend('localStorage'), getStorageBackend('sessionStorage')];
+
+  for (const storage of storages) {
+    const loaded = readEntriesFromStorage(storage);
+    if (loaded.length > 0) {
+      return loaded;
+    }
   }
+
+  return parseEntries(readCookieValue());
 }
 
 function render() {
