@@ -46,6 +46,10 @@ export function createOrderedListMarkup(items) {
     .join('\n')}\n</ol>`;
 }
 
+export function createTextFileContent(items) {
+  return items.map((item, index) => `${index + 1}. ${item.college} - ${item.course}`).join('\n');
+}
+
 function saveEntries() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
 }
@@ -116,9 +120,23 @@ function handleFormSubmit(event) {
   render();
 }
 
+function handleSaveFile() {
+  const content = createTextFileContent(entries);
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'college-course-list.txt';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
 if (typeof document !== 'undefined') {
   entries = loadEntries();
   document.getElementById('entry-form').addEventListener('submit', handleFormSubmit);
   document.getElementById('entry-list').addEventListener('click', handleListClick);
+  document.getElementById('save-file-btn').addEventListener('click', handleSaveFile);
   render();
 }
