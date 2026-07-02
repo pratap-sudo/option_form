@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>College and Course Option Builder</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <section class="card">
+        <h1>College and Course Option Builder</h1>
+        <p>Enter a college name and course, then arrange them in the order you want.</p>
+
+        <form id="entry-form" class="entry-form">
+          <label>
+            College name
+            <input id="college-input" name="college" type="text" placeholder="Example: IIT Delhi" required />
+          </label>
+          <label>
+            Course name
+            <input id="course-input" name="course" type="text" placeholder="Example: Computer Science" required />
+          </label>
+          <button type="submit">Add to list</button>
+        </form>
+
+        <div class="list-panel">
+          <div class="list-panel__header">
+            <h2>Your order</h2>
+            <p>Use the arrows to move each item up or down.</p>
+          </div>
+          <ul id="entry-list" class="entry-list"></ul>
+        </div>
+
+        <div class="preview-panel">
+          <h2>Generated form preview</h2>
+          <select id="preview-select" name="college-choice"></select>
+          <div class="preview-list" id="preview-list"></div>
+          <h3>HTML output</h3>
+          <pre id="html-output"></pre>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="./script.js"></script>
+  </body>
+</html>
