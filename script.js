@@ -1,3 +1,5 @@
+const STORAGE_KEY = 'option-form-entries';
+
 let entries = [];
 
 function createId() {
@@ -44,6 +46,22 @@ export function createOrderedListMarkup(items) {
     .join('\n')}\n</ol>`;
 }
 
+function saveEntries() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+}
+
+function loadEntries() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return [];
+    const parsed = JSON.parse(saved);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.warn('Unable to load saved entries:', error);
+    return [];
+  }
+}
+
 function render() {
   const list = document.getElementById('entry-list');
   const previewSelect = document.getElementById('preview-select');
@@ -70,6 +88,7 @@ function render() {
     ? `<ol>${entries.map((entry) => `<li>${entry.college} - ${entry.course}</li>`).join('')}</ol>`
     : '<p>No entries yet.</p>';
   htmlOutput.textContent = `<select name="college-choice">\n${createOptionMarkup(entries)}\n</select>`;
+  saveEntries();
 }
 
 function handleListClick(event) {
@@ -98,6 +117,7 @@ function handleFormSubmit(event) {
 }
 
 if (typeof document !== 'undefined') {
+  entries = loadEntries();
   document.getElementById('entry-form').addEventListener('submit', handleFormSubmit);
   document.getElementById('entry-list').addEventListener('click', handleListClick);
   render();
