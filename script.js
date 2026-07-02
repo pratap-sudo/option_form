@@ -161,6 +161,7 @@ function handleListClick(event) {
     entries = removeEntry(entries, id);
   }
   render();
+  syncEntriesToServer();
 }
 
 function handleFormSubmit(event) {
@@ -172,6 +173,7 @@ function handleFormSubmit(event) {
   collegeInput.value = '';
   courseInput.value = '';
   render();
+  syncEntriesToServer();
 }
 
 function handleSaveFile() {
@@ -187,10 +189,44 @@ function handleSaveFile() {
   URL.revokeObjectURL(url);
 }
 
+async function syncEntriesToServer() {
+  try {
+    const response = await fetch('/api/entries', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(entries)
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to sync entries');
+    }
+  } catch (error) {
+    console.warn('Unable to sync to server:', error);
+  }
+}
+
+async function loadEntriesFromServer() {
+  try {
+    const response = await fetch('/api/entries');
+    if (!response.ok) {
+      throw new Error('Failed to load entries');
+    }
+
+    const data = await response.json();
+    if (Array.isArray(data) && data.length > 0) {
+      entries = data;
+      render();
+    }
+  } catch (error) {
+    console.warn('Unable to load entries from server:', error);
+  }
+}
+
 if (typeof document !== 'undefined') {
   entries = loadEntries();
   document.getElementById('entry-form').addEventListener('submit', handleFormSubmit);
   document.getElementById('entry-list').addEventListener('click', handleListClick);
   document.getElementById('save-file-btn').addEventListener('click', handleSaveFile);
   render();
+  loadEntriesFromServer();
 }
