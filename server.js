@@ -3,6 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { normalizeEntries } from './entry-utils.js';
+import { getEntries, saveEntries } from './db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,16 +15,15 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
-let entries = [];
-
 app.get('/api/entries', (req, res) => {
-  res.json(normalizeEntries(entries));
+  res.json(normalizeEntries(getEntries()));
 });
 
 app.post('/api/entries', (req, res) => {
   const incoming = Array.isArray(req.body) ? req.body : [];
-  entries = normalizeEntries(incoming);
-  res.json(entries);
+  const normalized = normalizeEntries(incoming);
+  saveEntries(normalized);
+  res.json(normalized);
 });
 
 app.get('*', (req, res) => {
