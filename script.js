@@ -189,6 +189,32 @@ function handleSaveFile() {
   URL.revokeObjectURL(url);
 }
 
+function applyTheme(theme) {
+  const root = document.documentElement;
+  const toggle = document.getElementById('theme-toggle');
+
+  if (theme === 'dark') {
+    root.classList.add('dark');
+    if (toggle) toggle.textContent = '☀️';
+  } else {
+    root.classList.remove('dark');
+    if (toggle) toggle.textContent = '🌙';
+  }
+
+  localStorage.setItem('option-form-theme', theme);
+}
+
+function initTheme() {
+  const savedTheme = localStorage.getItem('option-form-theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme(savedTheme || (prefersDark ? 'dark' : 'light'));
+}
+
+function handleThemeToggle() {
+  const isDark = document.documentElement.classList.contains('dark');
+  applyTheme(isDark ? 'light' : 'dark');
+}
+
 async function syncEntriesToServer() {
   try {
     const response = await fetch('/api/entries', {
@@ -224,9 +250,12 @@ async function loadEntriesFromServer() {
 
 if (typeof document !== 'undefined') {
   entries = loadEntries();
+  initTheme();
+
   document.getElementById('entry-form').addEventListener('submit', handleFormSubmit);
   document.getElementById('entry-list').addEventListener('click', handleListClick);
   document.getElementById('save-file-btn').addEventListener('click', handleSaveFile);
+  document.getElementById('theme-toggle').addEventListener('click', handleThemeToggle);
   render();
   loadEntriesFromServer();
 }
